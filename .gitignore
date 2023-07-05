@@ -10,6 +10,7 @@ npm-debug.*
 web-build/
 .env
 *.env
+tables.txt
 
 # macOS
 .DS_Store
