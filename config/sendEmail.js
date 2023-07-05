@@ -3,10 +3,10 @@ const nodemailer = require('nodemailer');
 const sendEMail = async (email_address, message) => {
   try {
     const customTransportMail = nodemailer.createTransport({
-      service: 'gmail',
+      service: process.env.MAIL_HOST,
       auth: {
-        user: 'trupaddy160@gmail.com',
-        pass: 'ewpoqowdbdtmsjob',
+        user: process.env.MAIL_CLIENT_USER,
+        pass: process.env.MAIL_CLIENT_PASSWORD,
       },
       tls: {
         rejectUnauthorized: false,
@@ -14,7 +14,7 @@ const sendEMail = async (email_address, message) => {
     });
 
     const mailOptions = {
-      from:'support@truppady.com',
+      from: process.env.MAIL_SENDER,
       to: [email_address],
       subject: 'Trupaddy',
       text: '',
