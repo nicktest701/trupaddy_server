@@ -2,11 +2,11 @@ const nodemailer = require('nodemailer');
 
 const sendEMail = async (email_address, message) => {
   try {
-    const transportMail = nodemailer.createTransport({
+    const customTransportMail = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: process.env.MAIL_CLIENT_USER,
-        pass: process.env.MAIL_CLIENT_PASS,
+        user: 'trupaddy160@gmail.com',
+        pass: 'ewpoqowdbdtmsjob',
       },
       tls: {
         rejectUnauthorized: false,
@@ -14,14 +14,14 @@ const sendEMail = async (email_address, message) => {
     });
 
     const mailOptions = {
-      from: process.env.MAIL_CLIENT_USER,
+      from:'support@truppady.com',
       to: [email_address],
-      subject: 'FrebbyTech Consults',
+      subject: 'Trupaddy',
       text: '',
       html: message,
     };
 
-    const mailResult = await transportMail.sendMail(mailOptions);
+    const mailResult = await customTransportMail.sendMail(mailOptions);
     return mailResult;
   } catch (error) {
     console.log(error);
