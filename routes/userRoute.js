@@ -15,6 +15,7 @@ const sendEMail = require('../config/sendEmail');
 const mailText = require('../config/mailText');
 router.get(
   '/',
+  verifyJWT,
   expressAsyncHandler(async (req, res) => {
     const users = await knex('users').orderBy('users.created_at', 'desc');
 
@@ -24,6 +25,7 @@ router.get(
 
 router.get(
   '/search',
+  verifyJWT,
   expressAsyncHandler(async (req, res) => {
     const name = req.query.name;
     const users = await knex('users')
@@ -35,6 +37,7 @@ router.get(
 );
 router.get(
   '/:userId',
+  verifyJWT,
   expressAsyncHandler(async (req, res) => {
     const userId = req.params.userId;
     const user = await knex('users')
@@ -235,6 +238,7 @@ router.post(
 
 router.post(
   '/logout',
+  verifyJWT,
   expressAsyncHandler(async (req, res) => {
     res.cookie('user_', '', {
       httpOnly: true,
@@ -248,6 +252,7 @@ router.post(
 
 router.put(
   '/',
+  verifyJWT,
   expressAsyncHandler(async (req, res) => {
     const { id } = req.body;
     const modifiedUser = await knex('users').where({ id }).update(req.body);
@@ -258,6 +263,7 @@ router.put(
 
 router.patch(
   '/',
+  verifyJWT,
   expressAsyncHandler(async (req, res) => {
     const { id } = req.body;
     const modifiedUser = await knex('users').where({ id }).update(req.body);
@@ -269,6 +275,7 @@ router.patch(
 
 router.delete(
   '/',
+  verifyJWT,
   expressAsyncHandler(async (req, res) => {
     const id = req.query.id;
     const user = await knex('users').where({ id }).del();
