@@ -6,7 +6,7 @@ const sendEMail = async (email_address, message) => {
       service: process.env.MAIL_HOST,
       auth: {
         user: process.env.MAIL_CLIENT_USER,
-        pass: process.env.MAIL_CLIENT_PASSWORD,
+        pass: process.env.MAIL_CLIENT_PASS,
       },
       tls: {
         rejectUnauthorized: false,

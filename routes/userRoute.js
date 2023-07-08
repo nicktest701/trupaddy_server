@@ -12,7 +12,10 @@ const { otpGen } = require('otp-gen-agent');
 
 const verifyJWT = require('../middleware/verifyJWT');
 const sendEMail = require('../config/sendEmail');
-const mailText = require('../config/mailText');
+const {
+  emailVerificationText,
+  forgotPasswordText,
+} = require('../config/mailText');
 router.get(
   '/',
   verifyJWT,
@@ -33,6 +36,19 @@ router.get(
       .select(' id as _id', 'full_name as name', 'profile_image as avatar');
     // console.log(users);
     res.status(200).json(users);
+  })
+);
+router.get(
+  '/photos/:id',
+  verifyJWT,
+  expressAsyncHandler(async (req, res) => {
+    const userId = req.params.id;
+    const photos = await knex('photos')
+      .select('id', 'uri', 'created_at')
+      .where('user_id', userId)
+      .orderBy('created_at', 'desc');
+
+    res.json(photos);
   })
 );
 router.get(
@@ -190,7 +206,10 @@ router.post(
 
     const code = await otpGen();
 
-    const results = await sendEMail(email, mailText({ name, code }));
+    const results = await sendEMail(
+      email,
+      emailVerificationText({ name, code })
+    );
     // console.log(results);
 
     if (!results.messageId) {
@@ -212,6 +231,120 @@ router.post(
     await knex('otps').insert(opt);
 
     res.sendStatus(200);
+  })
+);
+
+router.put(
+  '/forgot-password',
+  expressAsyncHandler(async (req, res) => {
+    const { email } = req.body;
+
+    const isUserExists = await knex('users')
+      .where({ email })
+      .limit(1)
+      .select('email');
+    console.log(isUserExists);
+    if (isUserExists.length === 0) {
+      return res
+        .status(400)
+        .json('Sorry We couldnt find an account with this email!');
+    }
+
+    const code = await otpGen();
+
+    const results = await sendEMail(email, forgotPasswordText(code));
+    // console.log(results);
+
+    if (!results.messageId) {
+      res.status(400).json('Error sending request!');
+    }
+
+    //Generate OTP token
+    const token = jwt.sign(
+      { email, token: code },
+      process.env.OTP_TOKEN_SECRET,
+      {
+        expiresIn: '30m',
+      }
+    );
+
+    const opt = {
+      id: randomUUID(),
+      email,
+      token,
+    };
+
+    ///Save user info and OTP token
+    await knex('reset_otps').insert(opt);
+
+    res.sendStatus(200);
+  })
+);
+
+router.put(
+  '/reset-otp',
+  expressAsyncHandler(async (req, res) => {
+    const { token, email } = req.body;
+    console.log(token, email);
+    if (!token || !email) {
+      return res
+        .status(400)
+        .json('Error validating your token.Request for a new one!');
+    }
+
+    if (!token) {
+      return res.status(403).json('Invalid token');
+    }
+
+    const user = await knex('reset_otps')
+      .where({ email })
+      .select('email', 'token')
+      .orderBy('created_at', 'desc')
+      .limit(1);
+    if (_.isEmpty(user)) {
+      return res.status(404).json('Invalid token');
+    }
+
+    jwt.verify(
+      user[0].token,
+      process.env.OTP_TOKEN_SECRET,
+      (err, selectedUser) => {
+        if (err) {
+          return res.status(404).json('Token has expired!.');
+        }
+
+        if (token !== selectedUser.token) {
+          return res.status(404).json('Token is invalid.');
+        }
+
+        res.sendStatus(200);
+      }
+    );
+  })
+);
+
+router.put(
+  '/reset-password',
+  expressAsyncHandler(async (req, res) => {
+    const { email, password } = req.body;
+    console.log(email)
+
+    if (!email) {
+      return res
+        .status(400)
+        .json('Error resetting  your password.Try again later');
+    }
+
+    const salt = await bcrypt.genSalt(10);
+
+    const hashedPassword = await bcrypt.hash(password, salt);
+    req.body.password = hashedPassword;
+
+    await knex('users')
+      .update({ password: hashedPassword })
+      .where('email', email);
+
+    res.status(200).json('Password updated successfully!');
   })
 );
 
@@ -237,6 +370,31 @@ router.post(
 );
 
 router.post(
+  '/photos',
+  verifyJWT,
+  expressAsyncHandler(async (req, res) => {
+    const userId = req.user?._id;
+    const { photos } = req.body;
+
+    const modifiedPhotos = photos?.map((photo) => {
+      return {
+        id: randomUUID(),
+        uri: photo,
+        user_id: userId,
+      };
+    });
+
+    const uploadedPhotos = await knex('photos').insert(modifiedPhotos);
+
+    if (uploadedPhotos[0] !== 0) {
+      return res.status(400).json('Error saving photos!');
+    }
+
+    res.status(200).send('Photos Updated');
+  })
+);
+
+router.post(
   '/logout',
   verifyJWT,
   expressAsyncHandler(async (req, res) => {
@@ -244,7 +402,6 @@ router.post(
       httpOnly: true,
       expires: new Date(0),
     });
-    console.log('end');
 
     res.status(200).json('ok');
   })
@@ -267,7 +424,6 @@ router.patch(
   expressAsyncHandler(async (req, res) => {
     const { id } = req.body;
     const modifiedUser = await knex('users').where({ id }).update(req.body);
-    console.log(modifiedUser);
 
     res.status(201).json(modifiedUser);
   })

@@ -5,13 +5,10 @@
 const knex = require('knex')({
   client: 'mysql',
   connection: {
-    // host: '192.168.0.175',
-    // host: '127.0.0.1',
-    host: 'db4free.net',
+    // host: 'db4free.net',
+    host: '127.0.0.1',
     port: 3306,
-    //  user: 'root',
-    user: 'nicktest701',
-    //  password: '',
+     user: 'nicktest701',
     password: 'Akwasi21@guy',
     database: 'trupaddy',
   },

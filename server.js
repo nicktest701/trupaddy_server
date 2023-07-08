@@ -11,6 +11,7 @@ const session = require('express-session');
 const createError = require('http-errors');
 const rateLimit = require('express-rate-limit');
 
+
 //route path
 const userRoute = require('./routes/userRoute');
 const postRoute = require('./routes/postRoute');
@@ -49,7 +50,6 @@ if (process.env.NODE_ENV !== 'production') {
 }
 app.use(
   session({
-  
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
@@ -62,7 +62,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
 //routes
-app.use('/users', limit, userRoute);
+app.use('/users', userRoute);
 app.use('/posts', postRoute);
 app.use('/friendships', friendshipRoute);
 app.use('/followers', followerRoute);
@@ -77,8 +77,9 @@ app.use('/notifications', notificationRoute);
 //   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 // });
 
-const postUsers = [];
-// const
+
+
+
 
 io.on('connection', (socket) => {
   console.log('A user connected', socket.id);
@@ -94,18 +95,15 @@ io.on('connection', (socket) => {
     console.log(`${name} joined notifications room ${room}`);
   });
 
-  // socket.on('notications', (room, message) => {
-  //   io.to(room).emit('chatMessage', message);
-  // });
-
   //Chat
   socket.on('join', (room) => {
     socket.join(room);
     console.log(`User joined room ${room}`);
   });
 
-  socket.on('chatMessage', (room, message) => {
+  socket.on('chatMessage', (room, message, receiver) => {
     io.to(room).emit('chatMessage', message);
+    io.to(receiver).emit('notifications', 'Hello');
   });
 
   //Post
