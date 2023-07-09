@@ -56,11 +56,11 @@ router.get(
         ...comment,
         text: decodedText,
       };
-      // console.log(comment);
+     
       // return decodeURIComponent(comment);
       return modifiedComment;
     });
-    // console.log(comments);
+
 
     res.status(200).json(_.orderBy(comments, 'createdAt', 'desc'));
   })
@@ -89,7 +89,7 @@ router.post(
   expressAsyncHandler(async (req, res) => {
     req.body.id = randomUUID();
     const comment = await knex('comments').insert(req.body);
-    // console.log(req.body);
+   
 
     if (comment[0] !== 0) {
       return res.status(400).json('Error saving comment!');

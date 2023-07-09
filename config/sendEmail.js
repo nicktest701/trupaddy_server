@@ -24,7 +24,7 @@ const sendEMail = async (email_address, message) => {
     const mailResult = await customTransportMail.sendMail(mailOptions);
     return mailResult;
   } catch (error) {
-    console.log(error);
+
     throw error.message;
   }
 };

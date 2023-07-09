@@ -34,7 +34,7 @@ router.get(
     const users = await knex('users')
       .whereILike('full_name', `%${name}%`)
       .select(' id as _id', 'full_name as name', 'profile_image as avatar');
-    // console.log(users);
+
     res.status(200).json(users);
   })
 );
@@ -210,10 +210,9 @@ router.post(
       email,
       emailVerificationText({ name, code })
     );
-    // console.log(results);
 
     if (!results.messageId) {
-      res.status(400).json('Error sending request!');
+      return res.status(400).json('Error sending request!');
     }
 
     //Generate OTP token
@@ -243,7 +242,7 @@ router.put(
       .where({ email })
       .limit(1)
       .select('email');
-    console.log(isUserExists);
+
     if (isUserExists.length === 0) {
       return res
         .status(400)
@@ -253,10 +252,9 @@ router.put(
     const code = await otpGen();
 
     const results = await sendEMail(email, forgotPasswordText(code));
-    // console.log(results);
 
     if (!results.messageId) {
-      res.status(400).json('Error sending request!');
+      return res.status(400).json('Error sending request!');
     }
 
     //Generate OTP token
@@ -285,7 +283,7 @@ router.put(
   '/reset-otp',
   expressAsyncHandler(async (req, res) => {
     const { token, email } = req.body;
-    console.log(token, email);
+
     if (!token || !email) {
       return res
         .status(400)
@@ -327,8 +325,6 @@ router.put(
   '/reset-password',
   expressAsyncHandler(async (req, res) => {
     const { email, password } = req.body;
-    console.log(email)
-
     if (!email) {
       return res
         .status(400)

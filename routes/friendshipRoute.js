@@ -35,7 +35,7 @@ router.get(
         'users.created_at'
       )
       .orderBy('users.created_at', 'desc');
-    console.log(friends);
+   
     res.status(200).json(friends);
   })
 );
@@ -109,7 +109,6 @@ router.get(
       .where({ user_id, friend_id })
       .orWhere({ friend_id: user_id, user_id: friend_id });
 
-    // console.log(friendship)
 
     if (_.isEmpty(friendship)) {
       return res.status(200).json({

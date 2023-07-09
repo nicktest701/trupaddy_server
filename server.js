@@ -11,7 +11,6 @@ const session = require('express-session');
 const createError = require('http-errors');
 const rateLimit = require('express-rate-limit');
 
-
 //route path
 const userRoute = require('./routes/userRoute');
 const postRoute = require('./routes/postRoute');
@@ -39,7 +38,7 @@ const port = process.env.PORT || 8000;
 
 // middlewares
 app.set('trust proxy', 1);
-// app.get('/ip', (req, res) => res.send(req.ip));
+app.get('/ip', (req, res) => res.send(req.ip));
 app.use(cookieParser());
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
@@ -73,32 +72,23 @@ app.use('/notifications', notificationRoute);
 
 // app.use('/friend-requests', friendRequestRoute);
 
-// app.get('/*', function (req, res) {
-//   res.sendFile(path.join(__dirname, 'public', 'index.html'));
-// });
-
-
-
-
+app.get('/*', function (req, res) {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 io.on('connection', (socket) => {
-  console.log('A user connected', socket.id);
-
   //User
   socket.on('user-join', (room, name) => {
     socket.join(room);
-    console.log(`${name} joined user room ${room}`);
   });
 
   socket.on('notifications', (room, name) => {
     socket.join(room);
-    console.log(`${name} joined notifications room ${room}`);
   });
 
   //Chat
   socket.on('join', (room) => {
     socket.join(room);
-    console.log(`User joined room ${room}`);
   });
 
   socket.on('chatMessage', (room, message, receiver) => {
@@ -109,11 +99,9 @@ io.on('connection', (socket) => {
   //Post
   socket.on('post-join', (room, name) => {
     socket.join(room);
-    console.log(`${name} joined room ${room}`);
   });
 
   socket.on('post-comments', (room, { message, postee }) => {
-    //  console.log(message, postee);
     io.to(room).emit('post-comments', message);
 
     //Send notication to the user who posted the article
@@ -128,7 +116,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', (reason) => {
-    console.log('A user disconnected', reason);
+   
   });
 });
 
@@ -138,16 +126,20 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  console.log(err.message);
-  res.status(err.status || 500).json(err.message);
-  // .json('Error connecting to server.Please try connecting again!');
-
-  // res.json({
-  //   error: {
-  //     status: err.status || 500,
-  //     message: err.message,
-  //   },
-  // });
+  if (process.env.NODE_ENV !== 'production') {
+    res.json({
+      error: {
+        status: err.status || 500,
+        message: err,
+      },
+    });
+  } else {
+    res
+      .status(err.status || 500)
+      .json(err.message)
+      .json('Error connecting to server.Please try connecting again!');
+  }
 });
 
-server.listen(port, () => console.log(`listening on port ${port}!`));
+server.listen(port);
+//server.listen(port, () => console.log(`listening on port ${port}!`));

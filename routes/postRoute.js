@@ -79,7 +79,7 @@ router.get(
         'posts.created_at'
       );
 
-    // console.log(post[0].content);
+   
 
     res.status(200).json(post[0]);
   })
@@ -134,9 +134,9 @@ router.post(
   verifyJWT,
   expressAsyncHandler(async (req, res) => {
     req.body.id = randomUUID();
-    console.log(req.body);
+   
     const post = await knex('posts').insert(req.body);
-    console.log(post[0]);
+   
     if (post[0] !== 0) {
       return res.status(400).json('Error saving post!');
     }

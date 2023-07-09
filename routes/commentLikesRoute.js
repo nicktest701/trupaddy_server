@@ -31,7 +31,7 @@ router.comment(
   expressAsyncHandler(async (req, res) => {
     req.body.id = randomUUID();
     const comment = await knex('comment_likes').insert(req.body);
-    console.log(comment[0]);
+   
     if (comment[0] !== 0) {
       return res.status(400).json('Error saving comment!');
     }

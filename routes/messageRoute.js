@@ -164,7 +164,7 @@ router.post(
   expressAsyncHandler(async (req, res) => {
     req.body.id = randomUUID();
     const message = await knex('messages').insert(req.body);
-    // console.log(message[0]);
+
     if (message[0] !== 0) {
       return res.status(400).json('Error saving message!');
     }

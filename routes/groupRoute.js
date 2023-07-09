@@ -31,7 +31,7 @@ router.group(
   expressAsyncHandler(async (req, res) => {
     req.body.id = randomUUID();
     const group = await knex('groups').insert(req.body);
-    console.log(group[0]);
+   
     if (group[0] !== 0) {
       return res.status(400).json('Error saving group!');
     }

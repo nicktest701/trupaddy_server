@@ -14,7 +14,7 @@ router.get(
   '/all',
   expressAsyncHandler(async (req, res) => {
     const post_id = req.query.post_id;
-    console.log(post_id);
+    
     const likes = await knex('likes')
       .join('users', 'likes.user_id', '=', 'users.id')
       .where('likes.post_id', post_id)
@@ -25,7 +25,7 @@ router.get(
         'likes.created_at'
       )
       .orderBy('likes.created_at', 'asc');
-    // console.log(likes);
+    
     res.status(200).json(likes);
   })
 );

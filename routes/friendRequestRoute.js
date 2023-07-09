@@ -31,7 +31,7 @@ router.post(
   expressAsyncHandler(async (req, res) => {
     req.body.id = randomUUID();
     const friend_request = await knex('friend_requests').insert(req.body);
-    console.log(friend_request[0]);
+   
     if (friend_request[0] !== 0) {
       return res.status(400).json('Error saving friend_request!');
     }

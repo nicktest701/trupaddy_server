@@ -5,6 +5,9 @@ const router = require('express').Router();
 const expressAsyncHandler = require('express-async-handler');
 const _ = require('lodash');
 const knex = require('../config/knex');
+const verifyJWT = require('../middleware/verifyJWT');
+
+router.use(verifyJWT);
 
 // router.get(
 //   '/',
@@ -17,6 +20,7 @@ const knex = require('../config/knex');
 //@ GET all accepted followers by user id
 router.get(
   '/',
+
   expressAsyncHandler(async (req, res) => {
     const userId = req.query.user_id;
     const followers = await knex('followers')
@@ -30,7 +34,7 @@ router.get(
         'users.created_at'
       )
       .orderBy('users.created_at', 'desc');
-    // console.log(followers);
+
     res.status(200).json(followers);
   })
 );
@@ -41,7 +45,7 @@ router.post(
   '/',
   expressAsyncHandler(async (req, res) => {
     const follower = await knex('followers').insert(req.body);
-    console.log(follower[0]);
+
     if (follower[0] !== 0) {
       return res.status(400).json('Error saving follower!');
     }
