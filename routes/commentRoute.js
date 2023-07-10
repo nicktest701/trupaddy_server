@@ -25,7 +25,7 @@ router.get(
 
     const likes = await knex('likes').where('post_id', postId).count();
     const comments = await knex('comments').where('post_id', postId).count();
-    const likesCount = likes[0]['count(*)'];
+  
     const commentsCount = comments[0]['count(*)'];
 
     const count = {
@@ -56,8 +56,6 @@ router.get(
         ...comment,
         text: decodedText,
       };
-     
-      // return decodeURIComponent(comment);
       return modifiedComment;
     });
 

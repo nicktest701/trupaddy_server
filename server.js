@@ -96,6 +96,25 @@ io.on('connection', (socket) => {
     io.to(receiver).emit('notifications', 'Hello');
   });
 
+  //likes
+  socket.on('post-like-join', (room, name) => {
+    socket.join(room);
+  });
+
+  socket.on('post-likes', (room, { message }) => {
+    io.to(room).emit('post-likes', message);
+
+    //Send notication to the user who posted the article
+    // const noticationBody = {
+    //   type: 'post-comment',
+    //   id: room,
+    //   message: `${message.user?.name} commented on your post!`,
+    // };
+
+    //Check if postee equal to user
+    // io.to(postee).emit('notifications', noticationBody);
+  });
+
   //Post
   socket.on('post-join', (room, name) => {
     socket.join(room);
@@ -115,9 +134,7 @@ io.on('connection', (socket) => {
     io.to(postee).emit('notifications', noticationBody);
   });
 
-  socket.on('disconnect', (reason) => {
-   
-  });
+  socket.on('disconnect', (reason) => {});
 });
 
 //error handlers
@@ -141,5 +158,5 @@ app.use((err, req, res, next) => {
   }
 });
 
-server.listen(port);
-//server.listen(port, () => console.log(`listening on port ${port}!`));
+// server.listen(port);
+server.listen(port, () => console.log(`listening on port ${port}!`));
