@@ -25,7 +25,7 @@ router.get(
         'likes.created_at'
       )
       .orderBy('likes.created_at', 'asc');
-      console.log(likes.length)
+   
 
     res.status(200).json(likes);
   })
@@ -95,7 +95,10 @@ router.post(
         friend_name: name,
         friend_avatar: avatar,
       }),
-      message: `${name} liked your post`,
+      message:
+        postee === user_id
+          ? 'You liked your own post'
+          : `${name} liked your post`,
     };
 
     await knex('notifications').insert(noticationBody);

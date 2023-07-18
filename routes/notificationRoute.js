@@ -6,6 +6,7 @@ const expressAsyncHandler = require('express-async-handler');
 const { randomUUID } = require('crypto');
 const _ = require('lodash');
 const knex = require('../config/knex');
+const moment = require('moment');
 
 router.get(
   '/',
@@ -14,8 +15,34 @@ router.get(
     const notifications = await knex('notifications')
       .where({ user_id })
       .orderBy('created_at', 'desc');
- 
-    res.status(200).json(notifications);
+
+  ;
+
+    const modifiedNotifications = notifications.map((notif) => {
+      return {
+        ...notif,
+        title: moment(notif.created_at).fromNow(),
+      };
+    });
+
+    // Grouping the objects by 'created_at' with title for each group
+    const groupedData = [];
+    modifiedNotifications.sort((a, b) => a.title.localeCompare(b.title)); // Sort the array by 'title'
+
+    modifiedNotifications.forEach((obj) => {
+      const createdAt = obj.title;
+      const existingGroup = groupedData.find(
+        (group) => group.title === createdAt
+      );
+
+      if (existingGroup) {
+        existingGroup.data.push(obj); // Add the object to an existing group
+      } else {
+        groupedData.push({ title: createdAt, data: [obj] }); // Create a new group with a title and add the object
+      }
+    });
+
+    res.status(200).json(groupedData);
   })
 );
 
@@ -45,6 +72,21 @@ router.post(
   })
 );
 
+router.put(
+  '/status',
+  expressAsyncHandler(async (req, res) => {
+    const { id, status } = req.body;
+    const modifiedNotification = await knex('notifications')
+      .where({ id })
+      .update({ status });
+
+    if (modifiedNotification === 0) {
+      return res.status(400).json('Couldnt update the specified notification!');
+    }
+
+    res.status(201).json('Changes saved!');
+  })
+);
 router.put(
   '/',
   expressAsyncHandler(async (req, res) => {
@@ -83,7 +125,7 @@ router.delete(
   '/:id',
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
- 
+
     const deletedNotification = await knex('notifications').where({ id }).del();
 
     if (deletedNotification === 0) {

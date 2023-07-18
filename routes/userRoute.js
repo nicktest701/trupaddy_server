@@ -38,6 +38,58 @@ router.get(
     res.status(200).json(users);
   })
 );
+
+router.get(
+  '/info',
+  verifyJWT,
+  expressAsyncHandler(async (req, res) => {
+    const id = req.query.id;
+
+    const posts = await knex('posts')
+      .select('*')
+      .join('users', 'posts.user_id', '=', 'users.id')
+      .where('posts.user_id', id);
+
+    const friends = await knex.raw(
+      `SELECT
+        id as id,full_name as name,profile_image as avatar
+        
+  FROM
+      users
+  WHERE
+      id IN (
+      SELECT
+          friendships.friend_id AS id
+      FROM
+          friendships
+      JOIN users ON friendships.user_id = users.id
+      WHERE
+          friendships.user_id = ? and friendships.STATUS='accepted'
+      UNION
+  SELECT
+      friendships.user_id AS id
+  FROM
+      friendships
+  JOIN users ON friendships.friend_id = users.id
+  WHERE
+      friendships.friend_id = ? and friendships.STATUS='accepted');`,
+      [id, id]
+    );
+
+    const followers = await knex('followers')
+      .join('users', 'followers.follower_id', '=', 'users.id')
+      .where('followers.user_id', id);
+
+    const info = {
+      posts: posts.length,
+      friends: friends[0].length,
+      followers: followers.length,
+    };
+
+    res.status(200).json(info);
+  })
+);
+
 router.get(
   '/photos/:id',
   verifyJWT,

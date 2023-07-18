@@ -18,6 +18,7 @@ const friendRequestRoute = require('./routes/friendRequestRoute');
 const friendshipRoute = require('./routes/friendshipRoute');
 const followerRoute = require('./routes/followerRoute');
 const commentRoute = require('./routes/commentRoute');
+const shareRoute = require('./routes/shareRoute');
 const likeRoute = require('./routes/likeRoute');
 const messageRoute = require('./routes/messageRoute');
 const notificationRoute = require('./routes/notificationRoute');
@@ -67,6 +68,7 @@ app.use('/friendships', friendshipRoute);
 app.use('/followers', followerRoute);
 app.use('/comments', commentRoute);
 app.use('/likes', likeRoute);
+app.use('/shares', shareRoute);
 app.use('/messages', messageRoute);
 app.use('/notifications', notificationRoute);
 
@@ -79,10 +81,12 @@ app.get('/*', function (req, res) {
 io.on('connection', (socket) => {
   //User
   socket.on('user-join', (room, name) => {
+    console.log(`${name} joined room ${room}`);
     socket.join(room);
   });
 
-  socket.on('notifications', (room, name) => {
+  socket.on('notifications-join', (room, name) => {
+    console.log(`${name} joined notificatio ${room}`);
     socket.join(room);
   });
 
@@ -92,8 +96,8 @@ io.on('connection', (socket) => {
   });
 
   socket.on('chatMessage', (room, message, receiver) => {
-    io.to(room).emit('chatMessage', message);
-    io.to(receiver).emit('notifications', 'Hello');
+    io.to(room).emit('chatMessage', message, receiver);
+    io.to(receiver).emit('notifications', message, receiver);
   });
 
   //likes

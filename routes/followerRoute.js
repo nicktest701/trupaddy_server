@@ -9,13 +9,7 @@ const verifyJWT = require('../middleware/verifyJWT');
 
 router.use(verifyJWT);
 
-// router.get(
-//   '/',
-//   expressAsyncHandler(async (req, res) => {
-//     const followers = await knex('followers').orderBy('created_at', 'desc');
-//     res.status(200).json(followers);
-//   })
-// );
+
 
 //@ GET all accepted followers by user id
 router.get(

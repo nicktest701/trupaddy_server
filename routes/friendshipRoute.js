@@ -49,7 +49,7 @@ router.get(
     const friends = await knex.raw(
       `SELECT
       id as id,full_name as name,profile_image as avatar
-
+      
 FROM
     users
 WHERE
