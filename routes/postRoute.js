@@ -113,7 +113,7 @@ WHERE
 router.get(
   '/info',
   expressAsyncHandler(async (req, res) => {
-    const { id } = req.params;
+    const { id } = req.query;
     const likes = await knex('likes')
       .join('users', 'likes.user_id', '=', 'users.id')
       .where('likes.post_id', id);
