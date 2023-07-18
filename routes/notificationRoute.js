@@ -16,12 +16,11 @@ router.get(
       .where({ user_id })
       .orderBy('created_at', 'desc');
 
-  ;
-
     const modifiedNotifications = notifications.map((notif) => {
       return {
         ...notif,
-        title: moment(notif.created_at).fromNow(),
+        title: moment(notif.created_at).format('LL'),
+        type: JSON.parse(notif.type),
       };
     });
 
@@ -38,11 +37,14 @@ router.get(
       if (existingGroup) {
         existingGroup.data.push(obj); // Add the object to an existing group
       } else {
-        groupedData.push({ title: createdAt, data: [obj] }); // Create a new group with a title and add the object
+        groupedData.push({
+          title: createdAt,
+          data: [obj],
+        }); // Create a new group with a title and add the object
       }
     });
 
-    res.status(200).json(groupedData);
+    res.status(200).json(_.orderBy(groupedData, 'title', 'desc'));
   })
 );
 

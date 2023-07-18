@@ -111,6 +111,51 @@ WHERE
 );
 
 router.get(
+  '/info',
+  expressAsyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const likes = await knex('likes')
+      .join('users', 'likes.user_id', '=', 'users.id')
+      .where('likes.post_id', id);
+
+    const comments = await knex('comments').where('post_id', id);
+    const shares = await knex.raw(
+      `
+    SELECT
+    sharer.id AS sharer_id,
+    sharer.full_name AS sharer_name,
+    sharer.profile_image AS sharer_avatar,
+    shares.created_at AS post_shared_at,
+    postee.id AS poster_id,
+    postee.full_name AS poster_name,
+    postee.profile_image AS poster_avatar,
+    posts.id AS post_id,
+    posts.content AS post_content,
+    posts.created_at post_created_at
+FROM
+    shares
+JOIN users sharer ON
+    shares.sharer_id = sharer.id
+JOIN users postee ON
+    shares.sharer_id = postee.id
+JOIN posts ON shares.post_id = posts.id
+WHERE
+    shares.post_id = ?;
+    `,
+      [id]
+    );
+
+    const postInfo = {
+      likes: likes.length,
+      comments: comments.length,
+      shares: shares[0].length,
+    };
+    console.log(postInfo);
+
+    res.status(200).json(postInfo);
+  })
+);
+router.get(
   '/:id/:postee',
   expressAsyncHandler(async (req, res) => {
     const { id, postee } = req.params;

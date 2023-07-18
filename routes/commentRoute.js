@@ -16,26 +16,26 @@ router.get(
   })
 );
 
-//GET Number of Comments and Likes
-router.get(
-  '/count/:postId',
-  verifyJWT,
-  expressAsyncHandler(async (req, res) => {
-    const { postId } = req.params;
+// //GET Number of Comments and Likes
+// router.get(
+//   '/count/:postId',
+//   verifyJWT,
+//   expressAsyncHandler(async (req, res) => {
+//     const { postId } = req.params;
 
-    const likes = await knex('likes').where('post_id', postId).count();
-    const comments = await knex('comments').where('post_id', postId).count();
+//     const likes = await knex('likes').where('post_id', postId).count();
+//     const comments = await knex('comments').where('post_id', postId).count();
   
-    const commentsCount = comments[0]['count(*)'];
+//     const commentsCount = comments[0]['count(*)'];
 
-    const count = {
-      likes: likesCount,
-      comments: commentsCount,
-    };
+//     const count = {
+//       likes: likesCount,
+//       comments: commentsCount,
+//     };
 
-    res.status(200).json(count);
-  })
-);
+//     res.status(200).json(count);
+//   })
+// );
 
 //GET Number of Comments and Likes
 router.get(
