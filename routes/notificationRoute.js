@@ -29,6 +29,7 @@ router.get(
     modifiedNotifications.sort((a, b) => a.title.localeCompare(b.title)); // Sort the array by 'title'
 
     modifiedNotifications.forEach((obj) => {
+      const todayDate = moment(new Date()).format('LL');
       const createdAt = obj.title;
       const existingGroup = groupedData.find(
         (group) => group.title === createdAt
@@ -39,10 +40,12 @@ router.get(
       } else {
         groupedData.push({
           title: createdAt,
+          title2: moment(todayDate).diff(createdAt, 'days'),
           data: [obj],
         }); // Create a new group with a title and add the object
       }
     });
+    console.log(groupedData);
 
     res.status(200).json(_.orderBy(groupedData, 'title', 'desc'));
   })

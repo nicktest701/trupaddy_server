@@ -19,12 +19,14 @@ router.get(
     sharer.id AS sharer_id,
     sharer.full_name AS sharer_name,
     sharer.profile_image AS sharer_avatar,
+    shares.id,
     shares.created_at AS post_shared_at,
     postee.id AS poster_id,
     postee.full_name AS poster_name,
     postee.profile_image AS poster_avatar,
     posts.id AS post_id,
     posts.content AS post_content,
+    posts.bgColor AS bgColor,
     posts.created_at post_created_at
 FROM
     shares
@@ -41,6 +43,7 @@ JOIN posts ON shares.post_id = posts.id `
     const sharedItem = await _.toPlainObject(shares[0][0]);
 
     const sharer = {
+      share_post_id: id,
       id: sharedItem?.sharer_id,
       name: sharedItem?.sharer_name,
       avatar: sharedItem?.sharer_avatar,
@@ -52,8 +55,10 @@ JOIN posts ON shares.post_id = posts.id `
       name: sharedItem?.poster_name,
       avatar: sharedItem?.poster_avatar,
       content: sharedItem?.post_content,
+      bgColor: sharedItem?.bgColor,
       created_at: sharedItem?.post_created_at,
     };
+    console.log(post);
 
     res.status(200).json({ sharer, post });
   })
@@ -70,12 +75,14 @@ router.get(
     sharer.id AS sharer_id,
     sharer.full_name AS sharer_name,
     sharer.profile_image AS sharer_avatar,
+    shares.id,
     shares.created_at AS post_shared_at,
     postee.id AS poster_id,
     postee.full_name AS poster_name,
     postee.profile_image AS poster_avatar,
     posts.id AS post_id,
     posts.content AS post_content,
+    posts.bgColor AS bgColor,
     posts.created_at post_created_at
 FROM
     shares
@@ -98,6 +105,7 @@ WHERE
       const sharedItem = _.toPlainObject(item);
 
       const sharer = {
+        share_post_id: id,
         id: sharedItem?.sharer_id,
         name: sharedItem?.sharer_name,
         avatar: sharedItem?.sharer_avatar,
@@ -109,8 +117,10 @@ WHERE
         name: sharedItem?.poster_name,
         avatar: sharedItem?.poster_avatar,
         content: sharedItem?.post_content,
+        bgColor: sharedItem?.bgColor,
         created_at: sharedItem?.post_created_at,
       };
+      console.log(post);
       return { sharer, post };
     });
 
@@ -129,12 +139,14 @@ router.get(
     sharer.id AS sharer_id,
     sharer.full_name AS sharer_name,
     sharer.profile_image AS sharer_avatar,
+    shares.id,
     shares.created_at AS post_shared_at,
     postee.id AS poster_id,
     postee.full_name AS poster_name,
     postee.profile_image AS poster_avatar,
     posts.id AS post_id,
     posts.content AS post_content,
+    posts.bgColor AS bgColor,
     posts.created_at post_created_at
 FROM
     shares
@@ -157,6 +169,7 @@ WHERE
       const sharedItem = _.toPlainObject(item);
 
       const sharer = {
+        share_post_id: id,
         id: sharedItem?.sharer_id,
         name: sharedItem?.sharer_name,
         avatar: sharedItem?.sharer_avatar,
@@ -168,8 +181,12 @@ WHERE
         name: sharedItem?.poster_name,
         avatar: sharedItem?.poster_avatar,
         content: sharedItem?.post_content,
+        bgColor: sharedItem?.bgColor,
         created_at: sharedItem?.post_created_at,
       };
+
+      console.log(post);
+
       return { sharer, post };
     });
 
@@ -257,13 +274,8 @@ router.patch(
 router.delete(
   '/',
   expressAsyncHandler(async (req, res) => {
-    const { post_id, user_id } = req.query;
-    const deletedShare = await knex('shares')
-      .where({
-        post_id,
-        user_id,
-      })
-      .del();
+    const { id } = req.query;
+    const deletedShare = await knex('shares').where({ id }).del();
 
     if (deletedShare === 0) {
       return res
@@ -271,7 +283,7 @@ router.delete(
         .json('Couldnt update the specified share.Try again later');
     }
 
-    res.status(201).json('Share removed!');
+    res.status(201).json('Post removed!');
   })
 );
 

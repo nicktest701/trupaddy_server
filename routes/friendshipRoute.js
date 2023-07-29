@@ -35,7 +35,7 @@ router.get(
         'users.created_at'
       )
       .orderBy('users.created_at', 'desc');
-   
+
     res.status(200).json(friends);
   })
 );
@@ -109,12 +109,17 @@ router.get(
       .where({ user_id, friend_id })
       .orWhere({ friend_id: user_id, user_id: friend_id });
 
+    const followerStatus = await knex('followers').where({
+      user_id: friend_id,
+      follower_id: user_id,
+    });
 
     if (_.isEmpty(friendship)) {
       return res.status(200).json({
         status: 'not-friends',
         user_id: '',
         friend_id: '',
+        followerStatus: !_.isEmpty(followerStatus),
       });
     }
 
@@ -123,12 +128,14 @@ router.get(
         status: 'friends-accepted',
         user_id: friendship[0].user_id,
         friend_id: friendship[0].friend_id,
+        followerStatus: !_.isEmpty(followerStatus),
       });
     } else {
       return res.status(200).json({
         status: 'friends-pending',
         user_id: friendship[0].user_id,
         friend_id: friendship[0].friend_id,
+        followerStatus: !_.isEmpty(followerStatus),
       });
     }
   })
@@ -196,9 +203,7 @@ router.patch(
         .where({ user_id, friend_id })
         .del();
       if (friend !== 1) {
-        return res
-          .status(400)
-          .json('Error canceling request!');
+        return res.status(400).json('Error canceling request!');
       }
 
       return res.status(201).json('Request Cancelled!');

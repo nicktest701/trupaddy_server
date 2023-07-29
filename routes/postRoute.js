@@ -37,6 +37,7 @@ router.get(
         'posts.user_id as _id',
         'users.full_name as name',
         'users.profile_image as avatar',
+        'posts.bgColor',
         'posts.content',
         'posts.privacy',
         'posts.created_at'
@@ -56,6 +57,7 @@ router.get(
     posts.id AS post_id,
     posts.user_id AS postee,
     posts.content AS post_content,
+    posts.bgColor AS bgColor,
     posts.created_at post_created_at
 FROM
     shares
@@ -93,6 +95,7 @@ WHERE
           name: sharedItem?.poster_name,
           avatar: sharedItem?.poster_avatar,
           content: sharedItem?.post_content,
+          bgColor: sharedItem?.bgColor,
           created_at: sharedItem?.post_created_at,
         },
       };
@@ -131,6 +134,7 @@ router.get(
     postee.profile_image AS poster_avatar,
     posts.id AS post_id,
     posts.content AS post_content,
+    posts.bgColor AS bgColor,
     posts.created_at post_created_at
 FROM
     shares
@@ -171,6 +175,7 @@ router.get(
         'users.full_name as name',
         'users.profile_image as avatar',
         'posts.content',
+        'posts.bgColor',
         'posts.privacy',
         'posts.created_at'
       );
@@ -195,6 +200,7 @@ router.post(
         'users.full_name as name',
         'users.profile_image as avatar',
         'posts.content',
+        'posts.bgColor',
         'posts.privacy',
         'posts.created_at'
       )
@@ -272,9 +278,9 @@ router.patch(
 router.delete(
   '/',
   expressAsyncHandler(async (req, res) => {
-    const id = req.query.id;
-    const deletedPost = await knex('posts').where({ id }).del();
+    const { id } = req.query;
 
+    const deletedPost = await knex('posts').where({ id }).del();
     if (deletedPost === 0) {
       return res
         .status(400)
