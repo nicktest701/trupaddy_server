@@ -1,0 +1,29 @@
+{
+    "sqltools.connections": [
+        {
+            "mysqlOptions": {
+                "authProtocol": "default",
+                "enableSsl": "Disabled"
+            },
+            "previewLimit": 50,
+            "server": "localhost",
+            "driver": "MySQL",
+            "name": "Trupaddy",
+            "connectString": "mysql://b30a0c863ddc37:b59cd7ca@us-cdbr-east-06.cleardb.net/heroku_fae6ff20e78815c?reconnect=true"
+        },
+        {
+            "mysqlOptions": {
+                "authProtocol": "default",
+                "enableSsl": "Disabled"
+            },
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 3306,
+            "driver": "MariaDB",
+            "name": "Trupaddy Local",
+            "database": "trupaddy",
+            "username": "nicktest701",
+            "password": "Akwasi21@guy"
+        }
+    ]
+}

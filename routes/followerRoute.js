@@ -66,9 +66,9 @@ router.patch(
 router.delete(
   '/',
   expressAsyncHandler(async (req, res) => {
-    const { user_id, follower_id } = req.query;
+    const follower_id = req.user._id;
     const deletedFollower = await knex('followers')
-      .where({ user_id, follower_id })
+      .where({ follower_id })
       .del();
 
     if (deletedFollower === 0) {

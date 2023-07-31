@@ -6,13 +6,13 @@ const expressAsyncHandler = require('express-async-handler');
 const { randomUUID } = require('crypto');
 const _ = require('lodash');
 const knex = require('../config/knex');
-
 const verifyJWT = require('../middleware/verifyJWT');
+
+router.use(verifyJWT);
 
 //@GET Get posts from friends
 router.get(
   '/',
-  verifyJWT,
   expressAsyncHandler(async (req, res) => {
     const userId = req.user._id;
 
@@ -44,31 +44,14 @@ router.get(
       )
       .orderBy('posts.created_at', 'desc');
 
-    const query = `
-    SELECT
-    shares.id AS id,
-    sharer.id AS sharer_id,
-    sharer.full_name AS sharer_name,
-    sharer.profile_image AS sharer_avatar,
-    shares.created_at AS post_shared_at,
-    postee.id AS poster_id,
-    postee.full_name AS poster_name,
-    postee.profile_image AS poster_avatar,
-    posts.id AS post_id,
-    posts.user_id AS postee,
-    posts.content AS post_content,
-    posts.bgColor AS bgColor,
-    posts.created_at post_created_at
-FROM
-    shares
-JOIN users sharer ON
-    shares.sharer_id = sharer.id
-JOIN users postee ON
-    shares.postee_id = postee.id
-JOIN posts ON shares.post_id = posts.id
-WHERE
-    shares.sharer_id IN (${friends_ids.map(() => '?').join(', ')});
+    const query = `SELECT * FROM post_share_view WHERE sharer_id IN (${friends_ids
+      .map(() => '?')
+      .join(', ')});
     `;
+    // const query = `SELECT * FROM post_share_view WHERE shares.sharer_id IN (${friends_ids
+    //   .map(() => '?')
+    //   .join(', ')});
+    // `;
     const shares = await knex.raw(query, friends_ids);
 
     if (_.isEmpty(shares)) {
@@ -123,29 +106,7 @@ router.get(
 
     const comments = await knex('comments').where('post_id', id);
     const shares = await knex.raw(
-      `
-    SELECT
-    sharer.id AS sharer_id,
-    sharer.full_name AS sharer_name,
-    sharer.profile_image AS sharer_avatar,
-    shares.created_at AS post_shared_at,
-    postee.id AS poster_id,
-    postee.full_name AS poster_name,
-    postee.profile_image AS poster_avatar,
-    posts.id AS post_id,
-    posts.content AS post_content,
-    posts.bgColor AS bgColor,
-    posts.created_at post_created_at
-FROM
-    shares
-JOIN users sharer ON
-    shares.sharer_id = sharer.id
-JOIN users postee ON
-    shares.sharer_id = postee.id
-JOIN posts ON shares.post_id = posts.id
-WHERE
-    shares.post_id = ?;
-    `,
+      `SELECT * FROM post_share_view WHERE post_id = ?;`,
       [id]
     );
 
@@ -155,7 +116,6 @@ WHERE
       shares: shares[0].length,
     };
     console.log(postInfo);
-
     res.status(200).json(postInfo);
   })
 );
@@ -231,7 +191,6 @@ router.post(
 
 router.post(
   '/',
-  verifyJWT,
   expressAsyncHandler(async (req, res) => {
     req.body.id = randomUUID();
 
@@ -292,3 +251,45 @@ router.delete(
 );
 
 module.exports = router;
+
+// SELECT
+// sharer.id AS sharer_id,
+// sharer.full_name AS sharer_name,
+// sharer.profile_image AS sharer_avatar,
+// shares.created_at AS post_shared_at,
+// postee.id AS poster_id,
+// postee.full_name AS poster_name,
+// postee.profile_image AS poster_avatar,
+// posts.id AS post_id,
+// posts.content AS post_content,
+// posts.bgColor AS bgColor,
+// posts.created_at post_created_at
+// FROM
+// shares
+// JOIN users sharer ON
+// shares.sharer_id = sharer.id
+// JOIN users postee ON
+// shares.sharer_id = postee.id
+// JOIN posts ON shares.post_id = posts.id
+
+// SELECT
+// shares.id AS id,
+// sharer.id AS sharer_id,
+// sharer.full_name AS sharer_name,
+// sharer.profile_image AS sharer_avatar,
+// shares.created_at AS post_shared_at,
+// postee.id AS poster_id,
+// postee.full_name AS poster_name,
+// postee.profile_image AS poster_avatar,
+// posts.id AS post_id,
+// posts.user_id AS postee,
+// posts.content AS post_content,
+// posts.bgColor AS bgColor,
+// posts.created_at post_created_at
+// FROM
+// shares
+// JOIN users sharer ON
+// shares.sharer_id = sharer.id
+// JOIN users postee ON
+// shares.postee_id = postee.id
+// JOIN posts ON shares.post_id = posts.id
